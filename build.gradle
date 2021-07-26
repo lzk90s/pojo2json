@@ -15,12 +15,16 @@ intellij {
     updateSinceUntilBuild false
 }
 
+//runIde {
+//    jbrVersion = '11_0_2b159'
+//}
+
 patchPluginXml {
     sinceBuild "203"
 }
 
-publishPlugin {
-    token intellijPublishToken
-    username intellijPublishUsername
-    password intellijPublishPassword
-}
+//publishPlugin {
+//    token intellijPublishToken
+//    username intellijPublishUsername
+//    password intellijPublishPassword
+//}

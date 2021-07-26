@@ -42,7 +42,18 @@
                 text="POJO To Json Random Values"
                 description="Convert POJO to JSON and copy to the shear plate and randomly generate some test data">
 
-            <add-to-group group-id="EditorPopupMenu" relative-to-action="ink.organics.pojo2json.POJO2JsonDefaultAction" anchor="after"/>
+            <add-to-group group-id="EditorPopupMenu" relative-to-action="ink.organics.pojo2json.POJO2JsonDefaultAction"
+                          anchor="after"/>
+
+        </action>
+
+        <action class="ink.organics.pojo2json.POJO2JsonCommentAction"
+                id="ink.organics.pojo2json.POJO2JsonCommentAction"
+                text="POJO To Json Comment Values"
+                description="Convert POJO to JSON and copy to the shear plate and randomly generate some test data">
+
+            <add-to-group group-id="EditorPopupMenu" relative-to-action="ink.organics.pojo2json.POJO2JsonRandomAction"
+                          anchor="after"/>
 
         </action>
     </actions>

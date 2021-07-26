@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
+import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
 import ink.organics.pojo2json.fake.*;
@@ -28,7 +29,7 @@ public abstract class POJO2JsonAction extends AnAction {
             NotificationGroupManager.getInstance().getNotificationGroup("pojo2json.NotificationGroup");
 
     @NonNls
-    private final Map<String, JsonFakeValuesService> normalTypes = new HashMap<>();
+    protected final Map<String, JsonFakeValuesService> normalTypes = new HashMap<>();
 
     private final GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
 
@@ -82,7 +83,7 @@ public abstract class POJO2JsonAction extends AnAction {
     protected abstract Object getFakeValue(JsonFakeValuesService jsonFakeValuesService);
 
 
-    private Map<String, Object> getFields(PsiClass psiClass) {
+    protected Map<String, Object> getFields(PsiClass psiClass) {
         Map<String, Object> map = new LinkedHashMap<>();
 
         if (psiClass == null) {
@@ -90,26 +91,23 @@ public abstract class POJO2JsonAction extends AnAction {
         }
 
         for (PsiField field : psiClass.getAllFields()) {
-            map.put(fieldResolve(field), typeResolve(field.getType(), 0));
+            map.put(fieldResolve(field), typeResolve(field.getType(), field.getDocComment(), 0));
         }
 
         return map;
     }
 
-
-    private Object typeResolve(PsiType type, int level) {
+    protected Object typeResolve(PsiType type, PsiDocComment comment, int level) {
 
         level = ++level;
 
         if (type instanceof PsiPrimitiveType) {       //primitive Type
-
             return getPrimitiveTypeValue(type);
-
         } else if (type instanceof PsiArrayType) {   //array type
 
             List<Object> list = new ArrayList<>();
             PsiType deepType = type.getDeepComponentType();
-            list.add(typeResolve(deepType, level));
+            list.add(typeResolve(deepType, comment, level));
             return list;
 
         } else {    //reference Type
@@ -144,7 +142,7 @@ public abstract class POJO2JsonAction extends AnAction {
 
                     List<Object> list = new ArrayList<>();
                     PsiType deepType = PsiUtil.extractIterableTypeParameter(type, false);
-                    list.add(typeResolve(deepType, level));
+                    list.add(typeResolve(deepType, comment, level));
                     return list;
 
                 } else { // Object
@@ -160,7 +158,7 @@ public abstract class POJO2JsonAction extends AnAction {
                         }
 
                         for (PsiField field : psiClass.getAllFields()) {
-                            map.put(fieldResolve(field), typeResolve(field.getType(), level));
+                            map.put(fieldResolve(field), typeResolve(field.getType(), field.getDocComment(), level));
                         }
 
                         return map;
@@ -169,7 +167,6 @@ public abstract class POJO2JsonAction extends AnAction {
             }
         }
     }
-
 
     public Object getPrimitiveTypeValue(PsiType type) {
         switch (type.getCanonicalText()) {
@@ -190,7 +187,7 @@ public abstract class POJO2JsonAction extends AnAction {
         }
     }
 
-    private String fieldResolve(PsiField field) {
+    protected String fieldResolve(PsiField field) {
 
         PsiAnnotation annotation = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class.getName());
         if (annotation != null) {
